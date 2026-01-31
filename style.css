@@ -1,1 +1,16 @@
-/* Add styles here */
+:root {
+  --background-color: #ffffff;
+  --text-color: #333333;
+}
+
+[data-theme="dark"] {
+  --background-color: #333333;
+  --text-color: #ffffff;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+}
