@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Symbols collection - read-only for all, write for admin
+    match /symbols/{code} {
+      allow read: if true;
+      allow write: if false; // Only backend can write
+    }
+
+    // Quote snapshots - read-only for all, write for admin
+    match /quote_snapshots/{docId} {
+      allow read: if true;
+      allow write: if false; // Only backend can write
+    }
+
+    // Latest quotes - read-only for all, write for admin
+    match /latest_quotes/{code} {
+      allow read: if true;
+      allow write: if false; // Only backend can write
+    }
+  }
+}

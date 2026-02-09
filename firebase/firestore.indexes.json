@@ -1,0 +1,37 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "symbols",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "is_active", "order": "ASCENDING" },
+        { "fieldPath": "market", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "latest_quotes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "market", "order": "ASCENDING" },
+        { "fieldPath": "value", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "latest_quotes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "market", "order": "ASCENDING" },
+        { "fieldPath": "chg_pct", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "quote_snapshots",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "code", "order": "ASCENDING" },
+        { "fieldPath": "asof", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
