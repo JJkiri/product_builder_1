@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from app.models.schemas import Quote
-from app.services.firestore import firestore_service
+from app.services.memory_store import memory_store
 
 router = APIRouter()
 
@@ -13,8 +13,7 @@ async def get_quote(code: str):
 
     - **code**: 종목코드 (예: 005930)
     """
-    # Get latest quote
-    latest_quote = await firestore_service.get_latest_quote(code)
+    latest_quote = await memory_store.get_latest_quote(code)
 
     if not latest_quote:
         raise HTTPException(status_code=404, detail=f"Quote not found for code: {code}")

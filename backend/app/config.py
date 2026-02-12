@@ -10,16 +10,11 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # CORS settings
-    cors_origins: list[str] = ["*"]
-
-    # Firebase/Firestore settings
-    google_cloud_project: str = ""
-    firestore_database: str = "(default)"
-
-    # Data collection settings
-    collection_interval_minutes: int = 5
-    market_open_hour: int = 9
-    market_close_hour: int = 16
+    cors_origins: list[str] = [
+        "*",
+        "https://korean-stock-screener.web.app",
+        "https://korean-stock-screener.firebaseapp.com",
+    ]
 
     class Config:
         env_file = ".env"

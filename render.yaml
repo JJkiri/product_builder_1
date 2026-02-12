@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: korean-stock-screener-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: CORS_ORIGINS
+        value: '["https://korean-stock-screener.web.app","https://korean-stock-screener.firebaseapp.com"]'

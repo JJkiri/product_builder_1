@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, Query
 
 from app.models.schemas import Symbol
-from app.services.firestore import firestore_service
+from app.services.memory_store import memory_store
 
 router = APIRouter()
 
@@ -18,7 +18,7 @@ async def get_symbols(
     - **query**: 종목명 또는 종목코드로 검색 (선택)
     - **market**: 시장 구분 필터 (KOSPI, KOSDAQ, ALL)
     """
-    symbols = await firestore_service.get_symbols(
+    symbols = await memory_store.get_symbols(
         query=query,
         market=market
     )
