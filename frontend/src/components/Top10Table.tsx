@@ -7,9 +7,10 @@ interface Top10TableProps {
   asof?: string;
   showRisk?: boolean;
   loading?: boolean;
+  onStockClick?: (code: string) => void;
 }
 
-export default function Top10Table({ items, asof, showRisk = false, loading = false }: Top10TableProps) {
+export default function Top10Table({ items, asof, showRisk = false, loading = false, onStockClick }: Top10TableProps) {
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-md p-8 text-center">
@@ -84,7 +85,16 @@ export default function Top10Table({ items, asof, showRisk = false, loading = fa
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div>
-                    <div className="font-medium text-gray-900">{item.name}</div>
+                    {onStockClick ? (
+                      <button
+                        onClick={() => onStockClick(item.code)}
+                        className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left"
+                      >
+                        {item.name}
+                      </button>
+                    ) : (
+                      <div className="font-medium text-gray-900">{item.name}</div>
+                    )}
                     <div className="text-sm text-gray-500">
                       {item.code} · {item.market}
                     </div>

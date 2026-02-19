@@ -1,123 +1,108 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import SearchBar from '@/components/SearchBar';
-import FilterPanel from '@/components/FilterPanel';
-import RiskInputPanel from '@/components/RiskInputPanel';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import Top10Table from '@/components/Top10Table';
-import StockCard from '@/components/StockCard';
-import { getTop10, getQuote, Top10Params, Top10Item, Quote, Symbol } from '@/lib/api';
+import { getTop10, Top10Item } from '@/lib/api';
+
+const features = [
+  {
+    title: '주식 스크리너',
+    description: '거래대금 기준 Top10 종목을 필터링하고 켈리 기준 투자금액을 계산합니다.',
+    href: '/screener',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+      </svg>
+    ),
+  },
+  {
+    title: '차트 분석',
+    description: 'TradingView 실시간 차트로 기술적 분석을 수행합니다.',
+    href: '/chart',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+      </svg>
+    ),
+  },
+  {
+    title: '시장 지표',
+    description: 'KOSPI/KOSDAQ 지수, 환율, 시장 심리 지표를 한눈에 확인합니다.',
+    href: '/indicators',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+  },
+];
 
 export default function Home() {
-  const [filters, setFilters] = useState<Top10Params>({
-    market: 'ALL',
-    sort_by: 'value',
-    risk_pct: 0.01,
-    stop_pct: 0.03,
-    cap_pct: 0.10,
-  });
-
-  const [top10, setTop10] = useState<Top10Item[]>([]);
-  const [asof, setAsof] = useState<string>('');
-  const [loading, setLoading] = useState(false);
-  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchTop10 = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await getTop10(filters);
-      setTop10(response.items);
-      setAsof(response.asof);
-    } catch (err) {
-      console.error('Failed to fetch top 10:', err);
-      setError('데이터를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
-      setTop10([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters]);
+  const router = useRouter();
+  const [top5, setTop5] = useState<Top10Item[]>([]);
+  const [asof, setAsof] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchTop10();
-  }, [fetchTop10]);
-
-  // Auto-refresh every 5 minutes
-  useEffect(() => {
-    const interval = setInterval(fetchTop10, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [fetchTop10]);
-
-  const handleSymbolSelect = async (symbol: Symbol) => {
-    try {
-      const quote = await getQuote(symbol.code);
-      setSelectedQuote(quote);
-    } catch (err) {
-      console.error('Failed to fetch quote:', err);
-    }
-  };
-
-  const showRisk = filters.account_size !== undefined && filters.account_size > 0;
+    getTop10({ market: 'ALL', sort_by: 'value' })
+      .then((res) => {
+        setTop5(res.items.slice(0, 5));
+        setAsof(res.asof);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <>
       <Head>
-        <title>한국 주식 스크리너</title>
-        <meta name="description" content="코스피/코스닥 Top10 종목 스크리닝 및 켈리 기반 투자금액 계산" />
+        <title>KR Stock Lab - 한국 주식 분석 플랫폼</title>
+        <meta name="description" content="코스피/코스닥 주식 스크리닝, 기술적 분석, 시장 지표를 한곳에서" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <div className="space-y-6">
-        {/* Search */}
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-          <SearchBar onSelect={handleSymbolSelect} />
-          <button
-            onClick={fetchTop10}
-            disabled={loading}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <svg
-              className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+      <div className="space-y-8">
+        {/* Hero */}
+        <section className="text-center py-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+            한국 주식 분석 플랫폼
+          </h1>
+          <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+            코스피/코스닥 주식 스크리닝, 기술적 분석, 시장 지표를 한곳에서 확인하세요
+          </p>
+        </section>
+
+        {/* Feature Cards */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {features.map((f) => (
+            <Link
+              key={f.href}
+              href={f.href}
+              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow group"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            새로고침
-          </button>
-        </div>
+              <div className="text-blue-600 mb-4 group-hover:text-blue-700">{f.icon}</div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">{f.title}</h2>
+              <p className="text-sm text-gray-500">{f.description}</p>
+            </Link>
+          ))}
+        </section>
 
-        {/* Selected Stock Card */}
-        {selectedQuote && (
-          <StockCard quote={selectedQuote} onClose={() => setSelectedQuote(null)} />
-        )}
-
-        {/* Filters */}
-        <FilterPanel filters={filters} onChange={setFilters} />
-
-        {/* Risk Settings */}
-        <RiskInputPanel params={filters} onChange={setFilters} />
-
-        {/* Error message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
+        {/* Top 5 Preview */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">거래대금 Top 5</h2>
+            <Link href="/screener" className="text-sm text-blue-600 hover:text-blue-800">
+              전체 보기 &rarr;
+            </Link>
           </div>
-        )}
-
-        {/* Top 10 Table */}
-        <Top10Table
-          items={top10}
-          asof={asof}
-          showRisk={showRisk}
-          loading={loading}
-        />
+          <Top10Table
+            items={top5}
+            asof={asof}
+            loading={loading}
+            onStockClick={(code) => router.push(`/chart?code=${code}`)}
+          />
+        </section>
       </div>
     </>
   );
