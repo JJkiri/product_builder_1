@@ -109,3 +109,131 @@ export function formatPercent(pct: number): string {
   const sign = pct >= 0 ? '+' : '';
   return `${sign}${pct.toFixed(2)}%`;
 }
+
+// === Market / Indicators ===
+
+export interface MarketStats {
+  count: number;
+  up: number;
+  down: number;
+  flat: number;
+  total_value: number;
+  avg_chg_pct: number;
+  top_gainers: { code: string; name: string; chg_pct: number; price: number }[];
+  top_losers: { code: string; name: string; chg_pct: number; price: number }[];
+}
+
+export interface MarketSummary {
+  loaded: boolean;
+  asof?: string;
+  kospi?: MarketStats;
+  kosdaq?: MarketStats;
+  total?: MarketStats;
+}
+
+export interface MarketIndex {
+  code: string;
+  name: string;
+  price: string;
+  change: string;
+  change_direction: string;
+  chg_pct: string;
+  status: string;
+  traded_at: string;
+  chart_image: string;
+}
+
+export async function getMarketSummary(): Promise<MarketSummary> {
+  const response = await fetch(`${API_BASE_URL}/market-summary`);
+  if (!response.ok) throw new Error('Failed to fetch market summary');
+  return response.json();
+}
+
+export async function getMarketIndex(code: string): Promise<MarketIndex> {
+  const response = await fetch(`${API_BASE_URL}/market-index/${code}`);
+  if (!response.ok) throw new Error('Failed to fetch market index');
+  return response.json();
+}
+
+// === News ===
+
+export interface NewsItem {
+  title: string;
+  summary: string;
+  source: string;
+  thumbnail: string;
+  datetime: string;
+  link: string;
+}
+
+export interface NewsResponse {
+  items: NewsItem[];
+  page: number;
+  page_size: number;
+}
+
+export async function getNews(page = 1, pageSize = 20): Promise<NewsResponse> {
+  const response = await fetch(`${API_BASE_URL}/news?page=${page}&page_size=${pageSize}`);
+  if (!response.ok) throw new Error('Failed to fetch news');
+  return response.json();
+}
+
+export async function getStockNews(code: string, page = 1): Promise<NewsResponse> {
+  const response = await fetch(`${API_BASE_URL}/news/stock/${code}?page=${page}`);
+  if (!response.ok) throw new Error('Failed to fetch stock news');
+  return response.json();
+}
+
+// === Finance / Earnings ===
+
+export interface FinancePeriod {
+  title: string;
+  is_consensus: boolean;
+}
+
+export interface FinanceMetric {
+  title: string;
+  values: Record<string, string>;
+}
+
+export interface FinanceData {
+  code: string;
+  period_type: string;
+  periods: FinancePeriod[];
+  period_keys: string[];
+  metrics: FinanceMetric[];
+  summary: string[];
+}
+
+export interface FinanceDetail {
+  code: string;
+  name: string;
+  last_close: string;
+  open: string;
+  high: string;
+  low: string;
+  volume: string;
+  value: string;
+  market_cap: string;
+  foreign_rate: string;
+  high_52w: string;
+  low_52w: string;
+  per: string;
+  eps: string;
+  pbr: string;
+  bps: string;
+  dividend: string;
+  dividend_yield: string;
+}
+
+export async function getFinance(code: string, period: 'annual' | 'quarter' = 'annual'): Promise<FinanceData> {
+  const response = await fetch(`${API_BASE_URL}/finance/${code}?period=${period}`);
+  if (!response.ok) throw new Error('Failed to fetch finance data');
+  return response.json();
+}
+
+export async function getFinanceDetail(code: string): Promise<FinanceDetail> {
+  const response = await fetch(`${API_BASE_URL}/finance/${code}/detail`);
+  if (!response.ok) throw new Error('Failed to fetch finance detail');
+  return response.json();
+}

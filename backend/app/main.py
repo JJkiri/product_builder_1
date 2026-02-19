@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import symbols, quote, top10
+from app.routers import symbols, quote, top10, market, news, finance
 from app.collector.krx_fetcher import krx_fetcher
 from app.services.memory_store import memory_store
 from app.models.schemas import LatestQuote
@@ -68,6 +68,9 @@ app.add_middleware(
 app.include_router(symbols.router, tags=["Symbols"])
 app.include_router(quote.router, tags=["Quote"])
 app.include_router(top10.router, tags=["Top10"])
+app.include_router(market.router, tags=["Market"])
+app.include_router(news.router, tags=["News"])
+app.include_router(finance.router, tags=["Finance"])
 
 
 @app.get("/")
