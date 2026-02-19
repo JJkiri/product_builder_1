@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import symbols, quote, top10, market, news, finance, chart
+from app.routers import symbols, quote, top10, market, news, finance, chart, risk
 from app.collector.krx_fetcher import krx_fetcher
 from app.services.memory_store import memory_store
 from app.models.schemas import LatestQuote
@@ -72,6 +72,7 @@ app.include_router(market.router, tags=["Market"])
 app.include_router(news.router, tags=["News"])
 app.include_router(finance.router, tags=["Finance"])
 app.include_router(chart.router, tags=["Chart"])
+app.include_router(risk.router, tags=["Risk"])
 
 
 @app.get("/")

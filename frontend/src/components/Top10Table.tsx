@@ -60,10 +60,10 @@ export default function Top10Table({ items, asof, showRisk = false, loading = fa
               </th>
               {showRisk && (
                 <>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="hidden md:table-cell px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     손절가
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="hidden md:table-cell px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     최대 주수
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -113,14 +113,31 @@ export default function Top10Table({ items, asof, showRisk = false, loading = fa
                 </td>
                 {showRisk && (
                   <>
-                    <td className="px-4 py-3 whitespace-nowrap text-right text-gray-600">
-                      {item.stop_price ? `${formatNumber(item.stop_price)}원` : '-'}
+                    {/* 손절가 + risk_amount — md 이상에서만 표시 */}
+                    <td className="hidden md:table-cell px-4 py-3 whitespace-nowrap text-right">
+                      <div className="text-gray-700">
+                        {item.stop_price ? `${formatNumber(item.stop_price)}원` : '-'}
+                      </div>
+                      {item.risk_amount && (
+                        <div className="text-xs text-orange-500 mt-0.5">
+                          리스크 {formatNumber(item.risk_amount)}원
+                        </div>
+                      )}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-right font-medium text-blue-600">
+                    {/* 최대 주수 — md 이상에서만 표시 */}
+                    <td className="hidden md:table-cell px-4 py-3 whitespace-nowrap text-right font-medium text-blue-600">
                       {item.max_shares ? `${formatNumber(item.max_shares)}주` : '-'}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-right font-medium text-green-600">
-                      {item.max_investment ? `${formatNumber(item.max_investment)}원` : '-'}
+                    {/* 최대 투자금액 — 항상 표시, 모바일에선 서브텍스트로 손절가·주수 보완 */}
+                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                      <div className="font-medium text-green-600">
+                        {item.max_investment ? `${formatNumber(item.max_investment)}원` : '-'}
+                      </div>
+                      {item.stop_price && (
+                        <div className="text-xs text-gray-400 mt-0.5 md:hidden">
+                          손절 {formatNumber(item.stop_price)}원 · {item.max_shares ?? '-'}주
+                        </div>
+                      )}
                     </td>
                   </>
                 )}

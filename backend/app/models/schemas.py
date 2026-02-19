@@ -108,3 +108,29 @@ class Top10Response(BaseModel):
     """Top10 응답"""
     asof: datetime
     items: list[Top10Item]
+
+
+class KellyAnalysis(BaseModel):
+    """켈리 기준 리스크 분석 결과"""
+    code: str
+    name: str
+    current_price: int
+    lookback_days: int
+    # 역사적 통계
+    win_rate: float = Field(..., description="승률 (0~1)")
+    avg_gain_pct: float = Field(..., description="상승일 평균 수익률 (%)")
+    avg_loss_pct: float = Field(..., description="하락일 평균 손실률 (%, 절댓값)")
+    # 켈리 비율
+    kelly_fraction: float = Field(..., description="켈리 비율 (0~1)")
+    half_kelly_fraction: float = Field(..., description="하프켈리 비율 (0~1)")
+    # ATR 기반 손절
+    atr_pct: float = Field(..., description="ATR% (변동성 지표)")
+    stop_pct: float = Field(..., description="권장 손절폭 (ATR×2)")
+    stop_price: int = Field(..., description="권장 손절가 (원)")
+    # 포지션 계산
+    risk_amount: int = Field(..., description="허용 손실금액 (원)")
+    kelly_investment: int = Field(..., description="켈리 기준 투자금액 (원)")
+    risk_investment: int = Field(..., description="리스크 기준 투자금액 (원)")
+    cap_investment: int = Field(..., description="비중상한 기준 투자금액 (원)")
+    recommended_shares: int = Field(..., description="권장 주수")
+    recommended_investment: int = Field(..., description="권장 투자금액 (원)")

@@ -48,8 +48,32 @@ export interface Top10Params {
   sort_by?: 'value' | 'weighted';
   account_size?: number;
   risk_pct?: number;
-  stop_pct?: number;
   cap_pct?: number;
+}
+
+export interface KellyAnalysis {
+  code: string;
+  name: string;
+  current_price: number;
+  lookback_days: number;
+  // 역사적 통계
+  win_rate: number;
+  avg_gain_pct: number;
+  avg_loss_pct: number;
+  // 켈리 비율
+  kelly_fraction: number;
+  half_kelly_fraction: number;
+  // ATR 손절
+  atr_pct: number;
+  stop_pct: number;
+  stop_price: number;
+  // 포지션 계산
+  risk_amount: number;
+  kelly_investment: number;
+  risk_investment: number;
+  cap_investment: number;
+  recommended_shares: number;
+  recommended_investment: number;
 }
 
 // API Functions
@@ -81,7 +105,6 @@ export async function getTop10(params: Top10Params = {}): Promise<Top10Response>
   if (params.sort_by) searchParams.set('sort_by', params.sort_by);
   if (params.account_size !== undefined) searchParams.set('account_size', params.account_size.toString());
   if (params.risk_pct !== undefined) searchParams.set('risk_pct', params.risk_pct.toString());
-  if (params.stop_pct !== undefined) searchParams.set('stop_pct', params.stop_pct.toString());
   if (params.cap_pct !== undefined) searchParams.set('cap_pct', params.cap_pct.toString());
 
   const response = await fetch(`${API_BASE_URL}/top10?${searchParams.toString()}`);
@@ -262,5 +285,25 @@ export async function getFinance(code: string, period: 'annual' | 'quarter' = 'a
 export async function getFinanceDetail(code: string): Promise<FinanceDetail> {
   const response = await fetch(`${API_BASE_URL}/finance/${code}/detail`);
   if (!response.ok) throw new Error('Failed to fetch finance detail');
+  return response.json();
+}
+
+// === Kelly Risk Analysis ===
+
+export async function getKellyAnalysis(
+  code: string,
+  account_size: number,
+  risk_pct: number,
+  cap_pct: number,
+  lookback = 60,
+): Promise<KellyAnalysis> {
+  const params = new URLSearchParams({
+    account_size: account_size.toString(),
+    risk_pct: risk_pct.toString(),
+    cap_pct: cap_pct.toString(),
+    lookback: lookback.toString(),
+  });
+  const response = await fetch(`${API_BASE_URL}/risk/kelly/${code}?${params.toString()}`);
+  if (!response.ok) throw new Error('Failed to fetch kelly analysis');
   return response.json();
 }

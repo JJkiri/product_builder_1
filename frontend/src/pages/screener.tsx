@@ -5,14 +5,14 @@ import FilterPanel from '@/components/FilterPanel';
 import RiskInputPanel from '@/components/RiskInputPanel';
 import Top10Table from '@/components/Top10Table';
 import StockCard from '@/components/StockCard';
-import { getTop10, getQuote, Top10Params, Top10Item, Quote, Symbol } from '@/lib/api';
+import KellyPanel from '@/components/KellyPanel';
+import { getTop10, getQuote, getKellyAnalysis, Top10Params, Top10Item, Quote, Symbol, KellyAnalysis } from '@/lib/api';
 
 export default function ScreenerPage() {
   const [filters, setFilters] = useState<Top10Params>({
     market: 'ALL',
     sort_by: 'value',
     risk_pct: 0.01,
-    stop_pct: 0.03,
     cap_pct: 0.10,
   });
 
@@ -21,6 +21,9 @@ export default function ScreenerPage() {
   const [loading, setLoading] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [kellyResult, setKellyResult] = useState<KellyAnalysis | null>(null);
+  const [kellyLoading, setKellyLoading] = useState(false);
+  const [kellyError, setKellyError] = useState<string | null>(null);
 
   const fetchTop10 = useCallback(async () => {
     setLoading(true);
@@ -54,6 +57,27 @@ export default function ScreenerPage() {
       setSelectedQuote(quote);
     } catch (err) {
       console.error('Failed to fetch quote:', err);
+    }
+  };
+
+  const handleStockClick = async (code: string) => {
+    if (!filters.account_size || filters.account_size <= 0) return;
+    setKellyLoading(true);
+    setKellyError(null);
+    setKellyResult(null);
+    try {
+      const result = await getKellyAnalysis(
+        code,
+        filters.account_size,
+        filters.risk_pct ?? 0.01,
+        filters.cap_pct ?? 0.10,
+      );
+      setKellyResult(result);
+    } catch (err) {
+      console.error('Failed to fetch kelly analysis:', err);
+      setKellyError('켈리 분석 데이터를 불러오는데 실패했습니다.');
+    } finally {
+      setKellyLoading(false);
     }
   };
 
@@ -116,7 +140,28 @@ export default function ScreenerPage() {
           asof={asof}
           showRisk={showRisk}
           loading={loading}
+          onStockClick={showRisk ? handleStockClick : undefined}
         />
+
+        {/* Kelly Analysis Panel */}
+        {showRisk && (kellyLoading || kellyError || kellyResult) && (
+          <div>
+            {kellyLoading && (
+              <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                <p className="text-gray-500 text-sm">켈리 리스크 분석 중...</p>
+              </div>
+            )}
+            {kellyError && !kellyLoading && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {kellyError}
+              </div>
+            )}
+            {kellyResult && !kellyLoading && (
+              <KellyPanel result={kellyResult} onClose={() => setKellyResult(null)} />
+            )}
+          </div>
+        )}
       </div>
     </>
   );
