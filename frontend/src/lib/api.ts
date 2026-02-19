@@ -110,6 +110,33 @@ export function formatPercent(pct: number): string {
   return `${sign}${pct.toFixed(2)}%`;
 }
 
+// === Chart ===
+
+export interface Candle {
+  date: string; // "20260219"
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+export interface ChartData {
+  code: string;
+  period: string;
+  candles: Candle[];
+}
+
+export async function getChartData(
+  code: string,
+  period: 'day' | 'week' | 'month' = 'day',
+  count = 120,
+): Promise<ChartData> {
+  const response = await fetch(`${API_BASE_URL}/chart/${code}?period=${period}&count=${count}`);
+  if (!response.ok) throw new Error('Failed to fetch chart data');
+  return response.json();
+}
+
 // === Market / Indicators ===
 
 export interface MarketStats {
