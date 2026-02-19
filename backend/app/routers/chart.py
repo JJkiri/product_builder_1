@@ -11,7 +11,7 @@ NAVER_HEADERS = {
 @router.get("/chart/{code}")
 async def get_chart_data(
     code: str,
-    period: str = Query("day", regex="^(day|week|month)$"),
+    period: str = Query("day", pattern="^(day|week|month)$"),
     count: int = Query(120, ge=10, le=500),
 ):
     """종목 OHLCV 차트 데이터 (네이버 금융)"""

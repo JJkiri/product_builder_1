@@ -11,7 +11,7 @@ NAVER_HEADERS = {
 @router.get("/finance/{code}")
 async def get_finance(
     code: str,
-    period: str = Query("annual", regex="^(annual|quarter)$"),
+    period: str = Query("annual", pattern="^(annual|quarter)$"),
 ):
     """종목 재무제표 조회 (연간/분기)"""
     url = f"https://m.stock.naver.com/api/stock/{code}/finance/{period}"
